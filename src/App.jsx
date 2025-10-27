@@ -50,7 +50,6 @@ function App() {
   const [view, setView] = useState('home');
   const [cart, setCart] = useState([]); // {id, name, price, qty, image}
   const [activeItem, setActiveItem] = useState(null);
-  const [show3D, setShow3D] = useState(false); // default off for performance
 
   const subtotal = useMemo(() => cart.reduce((s, it) => s + it.price * it.qty, 0), [cart]);
 
@@ -82,13 +81,15 @@ function App() {
       <main>
         {view === 'home' && (
           <>
-            <Hero show3D={show3D} onToggle3D={() => setShow3D((s) => !s)} />
-            <ProductGrid
-              products={SAMPLE_PRODUCTS}
-              onAddToCart={addToCart}
-              onOpenItem={openItem}
-              formatINR={formatINR}
-            />
+            <Hero />
+            <section id="featured">
+              <ProductGrid
+                products={SAMPLE_PRODUCTS}
+                onAddToCart={addToCart}
+                onOpenItem={openItem}
+                formatINR={formatINR}
+              />
+            </section>
           </>
         )}
 
