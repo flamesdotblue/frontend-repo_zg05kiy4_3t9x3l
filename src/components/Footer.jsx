@@ -1,45 +1,51 @@
-export default function Footer() {
+import React from 'react';
+
+const Footer = () => {
   return (
-    <footer className="border-t border-gray-200 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 grid md:grid-cols-4 gap-8 text-sm">
-        <div>
-          <div className="flex items-center gap-2 mb-3">
-            <div className="h-8 w-8 rounded bg-gradient-to-tr from-indigo-600 to-violet-500" />
-            <span className="font-semibold text-gray-900">VibeShop</span>
+    <footer className="border-t border-gray-100 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div>
+            <h4 className="font-semibold mb-3">AutoMart</h4>
+            <p className="text-sm text-gray-600">
+              High-performance parts and accessories. Built for speed. Backed by
+              service.
+            </p>
           </div>
-          <p className="text-gray-600">Modern ecommerce built for speed and delightful shopping.</p>
+          <div>
+            <h5 className="font-medium mb-2">Shop</h5>
+            <ul className="space-y-2 text-sm text-gray-600">
+              <li>New arrivals</li>
+              <li>Best sellers</li>
+              <li>Wheels & tires</li>
+              <li>Body & aero</li>
+            </ul>
+          </div>
+          <div>
+            <h5 className="font-medium mb-2">Support</h5>
+            <ul className="space-y-2 text-sm text-gray-600">
+              <li>Help center</li>
+              <li>Shipping</li>
+              <li>Returns</li>
+              <li>Warranty</li>
+            </ul>
+          </div>
+          <div>
+            <h5 className="font-medium mb-2">Company</h5>
+            <ul className="space-y-2 text-sm text-gray-600">
+              <li>About</li>
+              <li>Careers</li>
+              <li>Press</li>
+              <li>Contact</li>
+            </ul>
+          </div>
         </div>
-        <div>
-          <h4 className="font-semibold text-gray-900 mb-3">Shop</h4>
-          <ul className="space-y-2 text-gray-600">
-            <li><a href="#" className="hover:text-gray-900">New arrivals</a></li>
-            <li><a href="#" className="hover:text-gray-900">Best sellers</a></li>
-            <li><a href="#" className="hover:text-gray-900">Gift cards</a></li>
-          </ul>
-        </div>
-        <div>
-          <h4 className="font-semibold text-gray-900 mb-3">Support</h4>
-          <ul className="space-y-2 text-gray-600">
-            <li><a href="#" className="hover:text-gray-900">Help center</a></li>
-            <li><a href="#" className="hover:text-gray-900">Returns</a></li>
-            <li><a href="#" className="hover:text-gray-900">Shipping</a></li>
-          </ul>
-        </div>
-        <div>
-          <h4 className="font-semibold text-gray-900 mb-3">Company</h4>
-          <ul className="space-y-2 text-gray-600">
-            <li><a href="#" className="hover:text-gray-900">About</a></li>
-            <li><a href="#" className="hover:text-gray-900">Careers</a></li>
-            <li><a href="#" className="hover:text-gray-900">Press</a></li>
-          </ul>
-        </div>
-      </div>
-      <div className="border-t border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 text-xs text-gray-500 flex items-center justify-between">
-          <p>© {new Date().getFullYear()} VibeShop. All rights reserved.</p>
-          <p>Secure payments • Fast checkout</p>
+        <div className="mt-8 pt-6 border-t border-gray-100 text-xs text-gray-500">
+          © {new Date().getFullYear()} AutoMart. All rights reserved.
         </div>
       </div>
     </footer>
   );
-}
+};
+
+export default Footer;
