@@ -4,229 +4,233 @@ import Hero from './components/Hero';
 import ProductGrid from './components/ProductGrid';
 import Footer from './components/Footer';
 
-function App() {
-  const [view, setView] = useState('home'); // home | cart | profile | item | admin | checkout
-  const [cart, setCart] = useState([]);
-  const [selectedItem, setSelectedItem] = useState(null);
+const formatINR = (value) =>
+  new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(value);
 
-  const subtotal = useMemo(
-    () => cart.reduce((sum, i) => sum + i.price * i.qty, 0),
-    [cart]
-  );
+const SAMPLE_PRODUCTS = [
+  {
+    id: 'p1',
+    name: 'Wireless Earbuds Pro',
+    price: 2499,
+    image: 'https://images.unsplash.com/photo-1574920164507-e651b363da83?ixid=M3w3OTkxMTl8MHwxfHNlYXJjaHwxfHxXaXJlbGVzcyUyMEVhcmJ1ZHMlMjBQcm98ZW58MHwwfHx8MTc2MTUzOTk5Mnww&ixlib=rb-4.1.0&w=1600&auto=format&fit=crop&q=80'
+  },
+  {
+    id: 'p2',
+    name: 'Insulated Water Bottle 1L',
+    price: 899,
+    image: 'https://images.unsplash.com/photo-1722532254518-89016ba75a15?ixid=M3w3OTkxMTl8MHwxfHNlYXJjaHwxfHxJbnN1bGF0ZWQlMjBXYXRlciUyMEJvdHRsZSUyMDFMfGVufDB8MHx8fDE3NjE1Mzk5OTN8MA&ixlib=rb-4.1.0&w=1600&auto=format&fit=crop&q=80'
+  },
+  {
+    id: 'p3',
+    name: 'Cotton T‑Shirt (Pack of 2)',
+    price: 699,
+    image: 'https://images.unsplash.com/photo-1651761179569-4ba2aa054997?ixid=M3w3OTkxMTl8MHwxfHNlYXJjaHwxfHxDb3R0b24lMjBUJUUyJTgwJTkxU2hpcnQlMjAlMjhQYWNrJTIwb2YlMjAyJTI5fGVufDB8MHx8fDE3NjE1Mzk5OTN8MA&ixlib=rb-4.1.0&w=1600&auto=format&fit=crop&q=80'
+  },
+  {
+    id: 'p4',
+    name: 'Stainless Steel Kadhai',
+    price: 1499,
+    image: 'https://images.unsplash.com/photo-1731539387024-4fff482fe68c?ixid=M3w3OTkxMTl8MHwxfHNlYXJjaHwxfHxTdGFpbmxlc3MlMjBTdGVlbCUyMEthZGhhaXxlbnwwfDB8fHwxNzYxNTM5OTk0fDA&ixlib=rb-4.1.0&w=1600&auto=format&fit=crop&q=80'
+  },
+  {
+    id: 'p5',
+    name: 'Smart LED Bulb (9W)',
+    price: 399,
+    image: 'https://images.unsplash.com/photo-1622574372197-b8e9fe9f522c?ixid=M3w3OTkxMTl8MHwxfHNlYXJjaHwxfHxTbWFydCUyMExFRCUyMEJ1bGIlMjAlMjg5VyUyOXxlbnwwfDB8fHwxNzYxNTM5OTk1fDA&ixlib=rb-4.1.0&w=1600&auto=format&fit=crop&q=80'
+  },
+  {
+    id: 'p6',
+    name: 'Backpack 28L Everyday',
+    price: 1799,
+    image: 'https://images.unsplash.com/photo-1671764673184-740ebf2cd637?ixid=M3w3OTkxMTl8MHwxfHNlYXJjaHwxfHxCYWNrcGFjayUyMDI4TCUyMEV2ZXJ5ZGF5fGVufDB8MHx8fDE3NjE1Mzk5OTV8MA&ixlib=rb-4.1.0&w=1600&auto=format&fit=crop&q=80'
+  }
+];
+
+function App() {
+  const [view, setView] = useState('home');
+  const [cart, setCart] = useState([]); // {id, name, price, qty, image}
+  const [activeItem, setActiveItem] = useState(null);
+  const [show3D, setShow3D] = useState(false); // default off for performance
+
+  const subtotal = useMemo(() => cart.reduce((s, it) => s + it.price * it.qty, 0), [cart]);
 
   const addToCart = (product) => {
     setCart((prev) => {
-      const existing = prev.find((p) => p.id === product.id);
-      if (existing) return prev.map((p) => (p.id === product.id ? { ...p, qty: p.qty + 1 } : p));
+      const exists = prev.find((p) => p.id === product.id);
+      if (exists) {
+        return prev.map((p) => (p.id === product.id ? { ...p, qty: p.qty + 1 } : p));
+      }
       return [...prev, { ...product, qty: 1 }];
     });
   };
 
-  const updateQty = (id, delta) => {
-    setCart((prev) =>
-      prev
-        .map((p) => (p.id === id ? { ...p, qty: Math.max(1, p.qty + delta) } : p))
-        .filter((p) => p.qty > 0)
-    );
+  const updateQty = (id, qty) => {
+    setCart((prev) => prev.map((p) => (p.id === id ? { ...p, qty: Math.max(1, qty) } : p)));
   };
 
-  const renderHome = () => (
-    <>
-      <Hero />
-      <ProductGrid
-        onAddToCart={(p) => addToCart(p)}
-        onOpenItem={(p) => {
-          setSelectedItem(p);
-          setView('item');
-        }}
-      />
-    </>
-  );
+  const removeFromCart = (id) => setCart((prev) => prev.filter((p) => p.id !== id));
 
-  const renderCart = () => (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <h1 className="text-2xl font-semibold tracking-tight mb-6">Your Cart</h1>
-      {cart.length === 0 ? (
-        <div className="text-gray-600">Your cart is empty.</div>
-      ) : (
-        <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-4">
-            {cart.map((item) => (
-              <div key={item.id} className="flex gap-4 p-4 border rounded-xl bg-white">
-                <img src={item.image} alt={item.name} className="h-24 w-24 rounded object-cover" />
-                <div className="flex-1">
-                  <div className="font-medium">{item.name}</div>
-                  <div className="text-sm text-gray-500">${item.price.toFixed(2)}</div>
-                  <div className="mt-3 flex items-center gap-2">
-                    <button
-                      className="px-2 py-1 rounded border"
-                      onClick={() => updateQty(item.id, -1)}
-                    >
-                      -
-                    </button>
-                    <span className="w-8 text-center">{item.qty}</span>
-                    <button
-                      className="px-2 py-1 rounded border"
-                      onClick={() => updateQty(item.id, 1)}
-                    >
-                      +
-                    </button>
+  const openItem = (product) => {
+    setActiveItem(product);
+    setView('item');
+  };
+
+  return (
+    <div className="min-h-screen bg-white text-gray-900">
+      <Navbar onNavigate={setView} cartCount={cart.reduce((s, i) => s + i.qty, 0)} />
+
+      <main>
+        {view === 'home' && (
+          <>
+            <Hero show3D={show3D} onToggle3D={() => setShow3D((s) => !s)} />
+            <ProductGrid
+              products={SAMPLE_PRODUCTS}
+              onAddToCart={addToCart}
+              onOpenItem={openItem}
+              formatINR={formatINR}
+            />
+          </>
+        )}
+
+        {view === 'cart' && (
+          <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+            <h2 className="text-2xl font-semibold">Your cart</h2>
+            {cart.length === 0 ? (
+              <p className="mt-4 text-gray-600">Your cart is empty.</p>
+            ) : (
+              <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 space-y-4">
+                  {cart.map((item) => (
+                    <div key={item.id} className="flex items-center gap-4 rounded-xl border p-4">
+                      <img src={item.image} alt={item.name} className="h-20 w-20 rounded object-cover" />
+                      <div className="flex-1">
+                        <h3 className="text-sm font-medium">{item.name}</h3>
+                        <p className="text-sm text-gray-600">{formatINR(item.price)}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => updateQty(item.id, item.qty - 1)}
+                          className="h-8 w-8 rounded border text-lg leading-none"
+                        >
+                          −
+                        </button>
+                        <input
+                          value={item.qty}
+                          onChange={(e) => updateQty(item.id, parseInt(e.target.value || '1', 10))}
+                          className="w-12 rounded border py-1 text-center"
+                        />
+                        <button
+                          onClick={() => updateQty(item.id, item.qty + 1)}
+                          className="h-8 w-8 rounded border text-lg leading-none"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <div className="w-24 text-right font-semibold">{formatINR(item.price * item.qty)}</div>
+                      <button onClick={() => removeFromCart(item.id)} className="text-sm text-red-600 hover:underline">Remove</button>
+                    </div>
+                  ))}
+                </div>
+                <aside className="rounded-xl border p-5 h-fit">
+                  <div className="flex items-center justify-between text-sm">
+                    <span>Subtotal</span>
+                    <span className="font-semibold">{formatINR(subtotal)}</span>
+                  </div>
+                  <button
+                    onClick={() => setView('checkout')}
+                    className="mt-4 w-full rounded-md bg-blue-600 py-2 text-white font-medium hover:bg-blue-700"
+                  >
+                    Checkout
+                  </button>
+                </aside>
+              </div>
+            )}
+          </section>
+        )}
+
+        {view === 'item' && activeItem && (
+          <section className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-10 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="aspect-square w-full overflow-hidden rounded-xl bg-gray-100">
+              <img src={activeItem.image} alt={activeItem.name} className="h-full w-full object-cover" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-semibold">{activeItem.name}</h1>
+              <p className="mt-2 text-xl text-blue-600 font-bold">{formatINR(activeItem.price)}</p>
+              <p className="mt-4 text-sm text-gray-600">Quality products delivered across India. Easy returns and secure checkout.</p>
+              <div className="mt-6 flex gap-3">
+                <button onClick={() => addToCart(activeItem)} className="rounded-md bg-gray-900 px-4 py-2 text-white">Add to cart</button>
+                <button onClick={() => { addToCart(activeItem); setView('checkout'); }} className="rounded-md bg-blue-600 px-4 py-2 text-white">Buy now</button>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {view === 'profile' && (
+          <section className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-10">
+            <h2 className="text-2xl font-semibold">Your account</h2>
+            <p className="mt-2 text-gray-600 text-sm">Sign in to view orders, addresses and payment options.</p>
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="rounded-xl border p-5">
+                <h3 className="font-medium">Login</h3>
+                <div className="mt-3 space-y-3">
+                  <input placeholder="Email" className="w-full rounded border px-3 py-2" />
+                  <input placeholder="Password" type="password" className="w-full rounded border px-3 py-2" />
+                  <button className="w-full rounded-md bg-gray-900 py-2 text-white">Sign in</button>
+                </div>
+              </div>
+              <div className="rounded-xl border p-5">
+                <h3 className="font-medium">Create account</h3>
+                <div className="mt-3 space-y-3">
+                  <input placeholder="Name" className="w-full rounded border px-3 py-2" />
+                  <input placeholder="Email" className="w-full rounded border px-3 py-2" />
+                  <input placeholder="Password" type="password" className="w-full rounded border px-3 py-2" />
+                  <button className="w-full rounded-md bg-blue-600 py-2 text-white">Sign up</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {view === 'checkout' && (
+          <section className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-10">
+            <h2 className="text-2xl font-semibold">Checkout</h2>
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="md:col-span-2 space-y-4">
+                <div className="rounded-xl border p-5">
+                  <h3 className="font-medium">Shipping address (India)</h3>
+                  <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <input placeholder="Full name" className="rounded border px-3 py-2" />
+                    <input placeholder="Phone" className="rounded border px-3 py-2" />
+                    <input placeholder="Address line 1" className="sm:col-span-2 rounded border px-3 py-2" />
+                    <input placeholder="Address line 2" className="sm:col-span-2 rounded border px-3 py-2" />
+                    <input placeholder="City" className="rounded border px-3 py-2" />
+                    <input placeholder="State" className="rounded border px-3 py-2" />
+                    <input placeholder="Pincode" className="rounded border px-3 py-2" />
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-          <aside className="lg:col-span-1 p-6 border rounded-xl bg-white h-fit">
-            <div className="flex items-center justify-between">
-              <span className="text-gray-600">Subtotal</span>
-              <span className="font-semibold">${subtotal.toFixed(2)}</span>
+              <aside className="rounded-xl border p-5 h-fit">
+                <h3 className="font-medium">Order summary</h3>
+                <div className="mt-3 space-y-2 text-sm">
+                  {cart.map((it) => (
+                    <div key={it.id} className="flex items-center justify-between">
+                      <span className="line-clamp-1">{it.name} × {it.qty}</span>
+                      <span className="font-semibold">{formatINR(it.price * it.qty)}</span>
+                    </div>
+                  ))}
+                  <div className="flex items-center justify-between pt-2 border-t">
+                    <span>Total</span>
+                    <span className="font-semibold">{formatINR(subtotal)}</span>
+                  </div>
+                </div>
+                <button className="mt-4 w-full rounded-md bg-green-600 py-2 text-white font-medium hover:bg-green-700">
+                  Pay securely (Razorpay soon)
+                </button>
+              </aside>
             </div>
-            <button
-              onClick={() => setView('checkout')}
-              className="mt-4 w-full py-3 rounded-md bg-black text-white font-medium hover:bg-gray-900"
-            >
-              Proceed to checkout
-            </button>
-          </aside>
-        </div>
-      )}
-    </main>
-  );
-
-  const renderProfile = () => (
-    <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <h1 className="text-2xl font-semibold tracking-tight mb-6">Your Profile</h1>
-      <div className="space-y-6">
-        <section className="p-6 border rounded-xl bg-white">
-          <h2 className="font-medium mb-2">Account</h2>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <input className="border rounded-md px-3 py-2" placeholder="Full name" />
-            <input className="border rounded-md px-3 py-2" placeholder="Email" />
-          </div>
-          <button className="mt-4 px-4 py-2 rounded-md bg-black text-white text-sm">Save</button>
-        </section>
-        <section className="p-6 border rounded-xl bg-white">
-          <h2 className="font-medium mb-2">Addresses</h2>
-          <div className="text-sm text-gray-600">Add your shipping and billing addresses.</div>
-        </section>
-      </div>
-    </main>
-  );
-
-  const renderItem = () => (
-    <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      {!selectedItem ? (
-        <div className="text-gray-600">No item selected.</div>
-      ) : (
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="aspect-[4/3] overflow-hidden rounded-xl border">
-            <img src={selectedItem.image} alt={selectedItem.name} className="w-full h-full object-cover" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">{selectedItem.name}</h1>
-            <div className="mt-2 text-xl font-semibold">${selectedItem.price.toFixed(2)}</div>
-            <p className="mt-4 text-gray-600">
-              Built for enthusiasts who demand more grip, more downforce, and more thrill. Premium
-              materials, tested on track.
-            </p>
-            <div className="mt-6 flex gap-3">
-              <button
-                onClick={() => addToCart(selectedItem)}
-                className="px-5 py-2.5 rounded-md bg-black text-white hover:bg-gray-900"
-              >
-                Add to cart
-              </button>
-              <button
-                onClick={() => {
-                  addToCart(selectedItem);
-                  setView('checkout');
-                }}
-                className="px-5 py-2.5 rounded-md border border-gray-300 hover:bg-gray-50"
-              >
-                Buy now
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </main>
-  );
-
-  const renderAdmin = () => (
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <h1 className="text-2xl font-semibold tracking-tight mb-6">Admin Panel</h1>
-      <div className="grid md:grid-cols-3 gap-6">
-        <section className="p-6 border rounded-xl bg-white">
-          <h2 className="font-medium mb-2">Login</h2>
-          <input className="border rounded-md px-3 py-2 w-full mb-2" placeholder="Email" />
-          <input className="border rounded-md px-3 py-2 w-full mb-3" placeholder="Password" type="password" />
-          <button className="px-4 py-2 rounded-md bg-black text-white text-sm w-full">Sign in</button>
-        </section>
-        <section className="p-6 border rounded-xl bg-white md:col-span-2">
-          <h2 className="font-medium mb-2">Quick Actions</h2>
-          <div className="grid sm:grid-cols-2 gap-3">
-            <button className="px-4 py-3 rounded-md border hover:bg-gray-50 text-left">Add product</button>
-            <button className="px-4 py-3 rounded-md border hover:bg-gray-50 text-left">Manage inventory</button>
-            <button className="px-4 py-3 rounded-md border hover:bg-gray-50 text-left">Orders</button>
-            <button className="px-4 py-3 rounded-md border hover:bg-gray-50 text-left">Customers</button>
-          </div>
-        </section>
-      </div>
-    </main>
-  );
-
-  const renderCheckout = () => (
-    <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <h1 className="text-2xl font-semibold tracking-tight mb-6">Checkout</h1>
-      <div className="grid md:grid-cols-3 gap-8">
-        <section className="md:col-span-2 space-y-6">
-          <div className="p-6 border rounded-xl bg-white">
-            <h2 className="font-medium mb-3">Shipping address</h2>
-            <div className="grid sm:grid-cols-2 gap-3">
-              <input className="border rounded-md px-3 py-2" placeholder="Full name" />
-              <input className="border rounded-md px-3 py-2" placeholder="Phone" />
-              <input className="border rounded-md px-3 py-2 sm:col-span-2" placeholder="Street address" />
-              <input className="border rounded-md px-3 py-2" placeholder="City" />
-              <input className="border rounded-md px-3 py-2" placeholder="Postal code" />
-            </div>
-          </div>
-          <div className="p-6 border rounded-xl bg-white">
-            <h2 className="font-medium mb-3">Payment</h2>
-            <p className="text-sm text-gray-600">Razorpay integration will appear here.</p>
-            <button className="mt-4 px-5 py-2.5 rounded-md bg-black text-white">Pay securely</button>
-          </div>
-        </section>
-        <aside className="p-6 border rounded-xl bg-white h-fit">
-          <h3 className="font-medium mb-3">Order summary</h3>
-          <div className="space-y-2 text-sm">
-            {cart.map((i) => (
-              <div key={i.id} className="flex items-center justify-between">
-                <span>
-                  {i.name} × {i.qty}
-                </span>
-                <span>${(i.price * i.qty).toFixed(2)}</span>
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 flex items-center justify-between">
-            <span className="text-gray-600">Subtotal</span>
-            <span className="font-semibold">${subtotal.toFixed(2)}</span>
-          </div>
-        </aside>
-      </div>
-    </main>
-  );
-
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 text-gray-900">
-      <Navbar onNavigate={setView} cartCount={cart.reduce((a, c) => a + c.qty, 0)} />
-
-      {view === 'home' && renderHome()}
-      {view === 'cart' && renderCart()}
-      {view === 'profile' && renderProfile()}
-      {view === 'item' && renderItem()}
-      {view === 'admin' && renderAdmin()}
-      {view === 'checkout' && renderCheckout()}
+          </section>
+        )}
+      </main>
 
       <Footer />
     </div>

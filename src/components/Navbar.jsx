@@ -1,66 +1,64 @@
 import React from 'react';
-import { ShoppingCart, User, Menu, Search } from 'lucide-react';
+import { Home, ShoppingCart, User, Search } from 'lucide-react';
 
-const Navbar = ({ onNavigate, cartCount = 0 }) => {
+function Navbar({ onNavigate, cartCount }) {
   return (
-    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-gray-100">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button
-            className="p-2 rounded-md hover:bg-gray-100 text-black"
-            aria-label="Menu"
-          >
-            <Menu className="h-5 w-5" />
-          </button>
-          <div
-            onClick={() => onNavigate('home')}
-            className="cursor-pointer select-none text-xl font-semibold tracking-tight"
-          >
-            AutoMart
+    <header className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur border-b border-gray-200">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => onNavigate('home')}
+              className="flex items-center gap-2 font-semibold text-gray-900 hover:text-blue-600"
+            >
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded bg-blue-600 text-white">AI</span>
+              <span className="hidden sm:inline">All-in-One Store</span>
+            </button>
           </div>
-        </div>
 
-        <div className="hidden md:flex items-center flex-1 max-w-xl mx-6">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search performance parts, accessories, brands..."
-              className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
-            />
+          <div className="hidden md:flex flex-1 max-w-xl mx-6">
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search for anything…"
+                className="w-full rounded-lg border border-gray-300 pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => onNavigate('admin')}
-            className="hidden sm:inline-flex text-sm font-medium text-gray-700 hover:text-black"
-          >
-            Admin
-          </button>
-          <button
-            onClick={() => onNavigate('profile')}
-            className="relative p-2 rounded-md hover:bg-gray-100 text-black"
-            aria-label="Profile"
-          >
-            <User className="h-5 w-5" />
-          </button>
-          <button
-            onClick={() => onNavigate('cart')}
-            className="relative p-2 rounded-md hover:bg-gray-100 text-black"
-            aria-label="Cart"
-          >
-            <ShoppingCart className="h-5 w-5" />
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 h-5 min-w-[1.25rem] px-1 rounded-full bg-black text-white text-xs grid place-items-center">
-                {cartCount}
-              </span>
-            )}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => onNavigate('home')}
+              className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+            >
+              <Home className="h-4 w-4" />
+              <span className="hidden sm:inline">Home</span>
+            </button>
+            <button
+              onClick={() => onNavigate('profile')}
+              className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+            >
+              <User className="h-4 w-4" />
+              <span className="hidden sm:inline">Profile</span>
+            </button>
+            <button
+              onClick={() => onNavigate('cart')}
+              className="relative inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+            >
+              <ShoppingCart className="h-4 w-4" />
+              <span className="hidden sm:inline">Cart</span>
+              {cartCount > 0 && (
+                <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-blue-600 px-1 text-xs font-semibold text-white">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </header>
   );
-};
+}
 
 export default Navbar;
